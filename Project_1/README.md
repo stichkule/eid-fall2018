@@ -33,6 +33,7 @@ Issue the following from a Bash shell:
 ```
 sudo python3 temp_rh_app.py
 ```
+Credentials for login screen: username = root; password = 5053
 
 ## Project Additions
 
