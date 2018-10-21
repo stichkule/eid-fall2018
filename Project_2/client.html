@@ -1,0 +1,283 @@
+<!--
+Client HTML Page to connect to and read and update temperature and relative humidity
+values from server. The client can also display values in selected units and 
+independent of the selection on server side. Clinet application also has a login
+interface before a connection is made.
+
+Authors: Jeet Baru
+-->
+
+<!doctype html>
+<html>
+  <head>
+    <title>Temperature Humididty Monitor</title>
+    <meta charset="utf-8" />
+    <style type="text/css">
+	  body {
+        text-align: center;
+        min-width: 500px;
+      }
+    </style>
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+	<!-- JavaScript for logic for connection, data exchange and button presses-->
+    <script>
+ 
+      // log function
+      log = function(data){
+        $("div#terminal").prepend("</br>" +data);
+        console.log(data);
+      };
+ 
+	  // document ready function
+      $(document).ready(function () {
+        $("div#message_details").hide()
+        $("div#connection_details").hide()
+ 
+        var ws;
+
+        //open connection button pressed callback function
+        $("#open").click(function(evt) {
+          evt.preventDefault();
+ 
+          var host = $("#host").val();
+          var port = $("#port").val();
+          var uri = $("#uri").val();
+ 
+          // create websockealt instance
+          ws = new WebSocket("ws://" + host + ":" + port + uri);
+          
+		  // function to convert incoming temperature to selected units 
+          selectTempUnit = function(respData){
+			  var radios = document.getElementsByName('UnitS');
+			  for (var i = 0, length = radios.length; i < length; i++) {
+					if (radios[i].checked) {
+						if(radios[i].value == respData[3])
+							var tempFloat = parseFloat(respData[1]);
+						else{
+							if(radios[i].value == "C"){
+								var temp = respData[1];
+								var tempFloat = parseFloat(temp);
+								tempFloat = (tempFloat - 32) * 5/9;
+							}
+							if(radios[i].value == "F"){
+								var temp = respData[1];
+								var tempFloat = parseFloat(temp);
+								tempFloat = (tempFloat * 9/5)+32 ;	
+							}
+						}
+					}
+				}
+				return tempFloat.toFixed(2);
+		  };
+           
+          // Handle incoming websocket message callback
+          ws.onmessage = function(evt) {
+			if(evt.data.indexOf(",") != -1){
+				var respData = evt.data.split(",");
+
+				//Current Temp Value Response
+				if(respData[0] == "1"){
+                    $("#CurrTempValue").text(selectTempUnit(respData));
+					$("#CurrTempTs").text(respData[2]);
+				}
+				//Current Hum Value Response
+				else if(respData[0] == "2"){
+					$("#CurrHumValue").text(respData[1]);
+					$("#CurrHumTs").text(respData[2]);
+				}
+				//Average Temp Value Response				
+				else if(respData[0] == "3"){
+					$("#AvgTempValue").text(selectTempUnit(respData));
+					$("#AvgTempTs").text(respData[2]);
+				}
+				//Average Hum Value Response
+				else if(respData[0] == "4"){
+					$("#AvgHumValue").text(respData[1]);
+					$("#AvgHumTs").text(respData[2]);
+				} 
+				//Maximum Temp Value Response
+				else if(respData[0] == "5"){
+					$("#HighTempValue").text(selectTempUnit(respData));
+					$("#HighTempTs").text(respData[2]);
+				}
+				//Minimum Temp Value Response
+				else if(respData[0] == "6"){
+					$("#LowTempValue").text(selectTempUnit(respData));
+					$("#LowTempTs").text(respData[2]);
+				} 
+				//Maximum Humidity Value Response
+				else if(respData[0] == "7"){
+					$("#HighHumValue").text(respData[1]);
+					$("#HighHumTs").text(respData[2]);
+				} 
+				//Minimum Humidity Value Response
+				else if(respData[0] == "8"){
+					$("#LowHumValue").text(respData[1]);
+					$("#LowHumTs").text(respData[2]);
+				} 
+			}
+            log("Message Received: " + evt.data)
+            };
+ 
+          // Close Websocket callback
+          ws.onclose = function(evt) {
+            log("***Connection Closed***");
+            alert("Connection Closed");
+            $("div#terminal").empty();
+			$("div#message_details").hide()
+			$("div#connection_details").hide()
+			$("div#login_details").show()
+            };
+ 
+          // Open Websocket callback
+          ws.onopen = function(evt) { 
+            $("div#message_details").show();
+            $("div#connection_details").hide();
+            log("***Connection Opened***");
+            ws.send("CurrTemp");
+            ws.send("CurrHum");
+            ws.send("AvgTemp");
+            ws.send("AvgHum");
+            ws.send("HighTemp");
+            ws.send("LowTemp");
+            ws.send("HighHum");
+            ws.send("LowHum");
+          };
+        });
+ 
+        //Login Button Press Callback Function
+        $("#login").click(function(evt) {
+			if ($("#uname").val() == "root" && $("#password").val() == "5053"){
+				$("div#login_details").hide()
+				$("div#connection_details").show()
+			}
+			else{
+				log("Invalid username or password");
+			}
+		});	
+        
+		//callback function for button press requesting each values
+		
+        $("#CurrTemp").click(function(evt) {
+            log("Sending Message: CurrTemp");
+            ws.send("CurrTemp");
+        });
+        
+        $("#CurrHum").click(function(evt) {
+            log("Sending Message: CurrHum");
+            ws.send("CurrHum");
+        });
+        
+        $("#AvgTemp").click(function(evt) {
+            log("Sending Message: AvgTemp");
+            ws.send("AvgTemp");
+        });
+        
+        $("#AvgHum").click(function(evt) {
+            log("Sending Message: AvgHum");
+            ws.send("AvgHum");
+        });
+        
+        $("#HighTemp").click(function(evt) {
+            log("Sending Message: HighTemp");
+            ws.send("HighTemp");
+        });
+        
+        $("#LowTemp").click(function(evt) {
+            log("Sending Message: LowTemp");
+            ws.send("LowTemp");
+        });
+        
+        $("#HighHum").click(function(evt) {
+            log("Sending Message: HighHum");
+            ws.send("HighHum");
+        });
+        
+        $("#LowHum").click(function(evt) {
+            log("Sending Message: LowHum");
+            ws.send("LowHum");
+        });
+        
+        
+ 
+      });
+    </script>
+  </head>
+ 
+  <body>
+    <h1>Temperature Humidity Monitor Client</h1>
+    
+	<!-- Login Page Division -->
+    <div id="login_details">
+	  <label for="uname">Username:</label>
+      <input type="text" id="uname" value="root"/><br />
+      <label for="password">Password:</label>
+      <input type="password" id="password" value="5053"/><br />
+      <input type="submit" id="login" value="login" />
+    </div>
+    
+	<!-- Connection Page Division -->
+    <div id="connection_details">
+      <label for="host">host:</label>
+      <input type="text" id="host" value="localhost" /><br />
+      <label for="port">port:</label>
+      <input type="text" id="port" value="8888" /><br />
+      <label for="uri">uri:</label>
+      <input type="text" id="uri" value="/ws" /><br />
+      <input type="submit" id="open" value="open" />
+    </div>
+	
+	<!-- Client Monitor UI Division -->
+    <div id="message_details">
+        </br></br>
+        <label for="Unit">Unit: </label>
+        <input type="radio" name="UnitS" value="C" checked> C
+        <input type="radio" name="UnitS" value="F" > F<br><br>
+        <input type="submit" id="CurrTemp" value="GetCurrTemp" /><br />
+        <label for="CurrTempValue">Current Temperature:</label>
+        <div id = "CurrTempValue">..</div>
+        <label for="CurrTempTs">Current Temperature Timestamp:</label>
+        <div id = "CurrTempTs">..</div><br />
+        <input type="submit" id="CurrHum" value="GetCurrHum" /><br />
+        <label for="CurrHumValue">Current Humidity:</label>
+        <div id = "CurrHumValue">..</div>
+        <label for="CurrHumTs">Current Humidity Timestamp:</label>
+        <div id = "CurrHumTs">..</div><br />
+        <input type="submit" id="AvgTemp" value="GetAvgTemp" /><br />
+        <label for="AvgTempValue">Average Temperature:</label>
+        <div id = "AvgTempValue">..</div>
+        <label for="AvgTempTs">Average Temperature Timestamp:</label>
+        <div id = "AvgTempTs">..</div><br />
+        <input type="submit" id="AvgHum" value="GetAvgHum" /><br />
+        <label for="AvgHumValue">Average Humidity:</label>
+        <div id = "AvgHumValue">..</div>
+        <label for="AvgHumTs">Average Humidity Timestamp:</label>
+        <div id = "AvgHumTs">..</div><br />
+        <input type="submit" id="HighTemp" value="GetHighTemp" /><br />
+        <label for="HighTempValue">Maximum Temperature:</label>
+        <div id = "HighTempValue">..</div>
+        <label for="HighTempTs">Maximum Temperature Timestamp:</label>
+        <div id = "HighTempTs">..</div><br />
+        <input type="submit" id="LowTemp" value="GetLowTemp" /><br />
+        <label for="LowTempValue">Minimum Temperature:</label>
+        <div id = "LowTempValue">..</div>
+        <label for="LowTempTs">Minimum Temperature Timestamp:</label>
+        <div id = "LowTempTs">..</div><br />
+        <input type="submit" id="HighHum" value="GetHighHum" /><br />
+        <label for="HighHumValue">Maximum Humidity:</label>
+        <div id = "HighHumValue">..</div>
+        <label for="HighHumTs">Maximum Humidity Timestamp:</label>
+        <div id = "HighHumTs">..</div><br />
+        <input type="submit" id="LowHum" value="GetLowHum" /><br />
+        <label for="LowHumValue">Minimum Humidity:</label>
+        <div id = "LowHumValue">..</div>
+        <label for="LowHumTs">Minimum Humidity Timestamp:</label>
+        <div id = "LowHumTs">..</div><br />
+        
+    </div>
+    
+    <div id="terminal">
+        
+    </div>
+  </body>
+</html>
