@@ -17,7 +17,7 @@ Shiril Tichkule and Jeet Baru
 ## Project Work
 
 * **Shiril Tichkule** - *Server-side UI, computing temp/RH statistics, creating CSV datastore, MQTT messaging, AWS IoT Thing configuration*
-* **Jeet Baru** - Lambda function, AWS IoT Thing and SQS queue configuration, client-side UI, data plotting*
+* **Jeet Baru** - *Lambda function, AWS IoT Thing and SQS queue configuration, client-side UI, data plotting*
 
 ## Installation Instructions
 
@@ -30,7 +30,7 @@ git clone https://github.com/stichkule/eid-fall2018.git
 Navigate to the <Project_3> directory:
     
 ```
-cd eid-fall2018/Project_2
+cd eid-fall2018/Project_3
 ```
 
 ## Running the application -- Server
