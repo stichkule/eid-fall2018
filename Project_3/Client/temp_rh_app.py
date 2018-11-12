@@ -138,7 +138,7 @@ def fetch_and_plot():
     
     #Loop to receive 30 messgaes and append data to the lists for plotting
     for i in range(3):
-        response = queue.receive_messages(QueueUrl='https://sqs.us-west-2.amazonaws.com/572594505086/RPi3-FIFO.fifo',MaxNumberOfMessages=10)
+        response = queue.receive_messages(QueueUrl='your_queue_url.fifo',MaxNumberOfMessages=10)
         for msg in response:
             count = count + 1
             m = ast.literal_eval(msg.body)
