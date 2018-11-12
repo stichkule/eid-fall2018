@@ -1,7 +1,7 @@
 # Temperature and Relative Humidity dashboard using Qt, Python, and Websockets
 
 Project 2 for ECEN 5053 (Embedded Interface Design) involved creating a HTML dashboard for displaying temperature and humidity values read from a DHT22 sensor.
-The server-side UI was created using Qt Designer, pyuic5, Python, and pyqt5, and it displays timestamped measuements of the current, max, min, and average
+The server-side UI was created using Qt Designer, pyuic5, Python, and pyqt5, and it displays timestamped measurements of the current, max, min, and average
 temperature and relative humidity. A second server-side script uses Tornado to make a websocket-based client connection and service user requests by providing
 the appropriate data. The client-side UI was designed as a simple webpage that connects to the server Pi, and has buttons via which the user can request measured
 data. The server and client were implemented on two different Raspberry Pi 3 (Model B) SBCs.
